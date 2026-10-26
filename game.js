@@ -99,7 +99,7 @@ for(let n=0;n<3+i;n++){const x=850+n*620;if(x<len-200)hazards.push({x,y:ground-2
 if(i===0||i===4||i===5)for(const hole of holes)bridges.push({x:hole.x-15,y:ground-8,w:hole.w+30,h:11,rope:true});
 if(i===5)enemies.push({x:len-340,y:ground-100,w:95,h:90,base:len-340,range:110,dir:-1,type:'boss',alive:true,hp:4,phase:0});
 return {len,ground,holes,platforms,blocks,items,enemies,hazards,bridges,goal:{x:len-95,y:ground-95,w:70,h:95},checkpoint:{x:Math.floor(len*.52),active:false}}}
-function launch(i){audioStart();stage=i;level=buildLevel(stage);player={x:65,y:level.ground-76,w:58,h:76,vx:0,vy:0,grounded:false,face:1,anim:0,lives:3,invuln:0,power:'',powerTime:0,ability:0,glide:0,coyote:0,jumpBuffer:0,doubleJump:false,score:0};score=0;coins=0;bones=0;stars=0;shield=0;cam=0;gameTime=240;checkpoint=65;particles=[];shake=0;gameOver=false;stageDone=false;running=true;paused=false;wasJump=false;wasPower=false;musicIndex=0;musicTick=0;page('play');updateHud();announce('🐾 '+THEMES[stage].name+' — Encontre 5 estrelas!',2200);last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
+function launch(i){audioStart();stageDone=false;stage=i;level=buildLevel(stage);player={x:65,y:level.ground-76,w:58,h:76,vx:0,vy:0,grounded:false,face:1,anim:0,lives:3,invuln:0,power:'',powerTime:0,ability:0,glide:0,coyote:0,jumpBuffer:0,doubleJump:false,score:0};score=0;coins=0;bones=0;stars=0;shield=0;cam=0;gameTime=240;checkpoint=65;particles=[];shake=0;gameOver=false;stageDone=false;running=true;paused=false;wasJump=false;wasPower=false;musicIndex=0;musicTick=0;page('play');updateHud();announce('🐾 '+THEMES[stage].name+' — Encontre 5 estrelas!',2200);last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
 function updateHud(){$('hudHero').textContent=HEROES[hero][0].toUpperCase();$('hudLives').textContent='❤️'.repeat(Math.max(0,player.lives));$('hudItems').textContent=`⭐ ${stars}/5 · 🦴 ${bones} · 🪙 ${coins} · 🛡️ ${shield}`;$('hudLevel').textContent='FASE 1-'+(stage+1)+' '+THEMES[stage].name;$('hudTime').textContent='⏱ '+Math.max(0,Math.ceil(gameTime))}
 function sparks(x,y,color,count=12){for(let i=0;i<count;i++)particles.push({x,y,vx:R(-170,170),vy:R(-220,10),life:R(.25,.8),color,size:R(3,7)})}
 function hurt(){if(player.invuln>0)return;if(shield){shield--;player.invuln=1.1;beep(650,.16);announce('🛡️ Escudo protegeu!');updateHud();return}player.lives--;player.invuln=1.8;shake=9;beep(155,.3,'sawtooth');sparks(player.x+30,player.y+30,'#ff7777');updateHud();if(player.lives<=0){running=false;gameOver=true;modal('💙 Tente novamente!','Você foi muito corajoso! Quer repetir esta fase?',[['🔄 Tentar de novo',()=>launch(stage)],['🏠 Menu',()=>page('menu')]])}else{player.x=checkpoint;player.y=level.ground-140;player.vx=0;player.vy=0;announce('Vamos tentar mais uma vez!')}}
@@ -142,7 +142,7 @@ function congratulateJoaoGuilherme(){
   window.speechSynthesis.speak(utterance);
  }catch(e){console.warn('Voz de parabéns indisponível:',e)}
 }
-function finishStage(){running=false;stageDone=true;musicTick=0;congratulateJoaoGuilherme();const total=score+coins*10+bones*15+Math.ceil(gameTime);saved.bests[stage]=Math.max(saved.bests[stage]||0,total);saved.unlocked=Math.max(saved.unlocked,Math.min(6,stage+2));persist();beep(900,.28);modal(stage===5?'🏆 MISSÃO FINAL CUMPRIDA!':'🎉 FASE CONCLUÍDA!',`🎉 Parabéns, João Guilherme! Você passou de fase!\n\nEstrelas: ${stars}/5 · Moedas: ${coins} · Ossos: ${bones} · Pontos: ${total}`,[...(stage<5?[['➡️ Próxima fase',()=>launch(stage+1)]]:[]),['🗺️ Fases',levelsPage],['🏠 Menu',()=>page('menu')]])}
+function finishStage(){running=false;stageDone=true;menuPadPreviousY=!!activePad()?.buttons?.[3]?.pressed;musicTick=0;congratulateJoaoGuilherme();const total=score+coins*10+bones*15+Math.ceil(gameTime);saved.bests[stage]=Math.max(saved.bests[stage]||0,total);saved.unlocked=Math.max(saved.unlocked,Math.min(6,stage+2));persist();beep(900,.28);modal(stage===5?'🏆 MISSÃO FINAL CUMPRIDA!':'🎉 FASE CONCLUÍDA!',`🎉 Parabéns, João Guilherme! Você passou de fase!\n\nEstrelas: ${stars}/5 · Moedas: ${coins} · Ossos: ${bones} · Pontos: ${total}`,[...(stage<5?[['🎮 Y — Próxima fase',()=>launch(stage+1)]]:[]),['🗺️ Fases',levelsPage],['🏠 Menu',()=>page('menu')]])}
 function drawRect(x,y,w,h,c){g.fillStyle=c;g.fillRect(x,y,w,h)}function round(x,y,w,h,r,c){g.fillStyle=c;g.beginPath();g.roundRect(x,y,w,h,r);g.fill()}
 function cloud(x,y,s){g.fillStyle='#fffbe9c9';for(const [a,b,r] of [[0,0,23],[23,-10,29],[51,0,22]]){g.beginPath();g.ellipse(x+a*s,y+b*s,r*s,r*.66*s,0,0,TAU);g.fill()}}
 
@@ -286,6 +286,16 @@ function menuGamepad(t){
  if(!p){menuPadPreviousDirection=0;menuPadPreviousY=false;return}
  const yPressed=!!p.buttons?.[3]?.pressed; // Y no mapeamento padrão do navegador
  const menuVisible=!$('menu').hidden&&!overlay;
+ const victoryVisible=stageDone&&overlay&&!$('overlay').hidden;
+ if(victoryVisible){
+   if(yPressed&&!menuPadPreviousY){
+     if(stage<5)launch(stage+1);
+     else {stageDone=false;page('menu')}
+   }
+   menuPadPreviousY=yPressed;
+   menuPadPreviousDirection=0;
+   return;
+ }
  if(!menuVisible){menuPadPreviousDirection=0;menuPadPreviousY=yPressed;return}
  const direction=padDirection(p);
  if(direction&&(direction!==menuPadPreviousDirection||t>=menuPadNextMove)){
