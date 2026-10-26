@@ -83,7 +83,23 @@ for(const platform of level.platforms)if(platform.moving&&!platform.broken)platf
 for(const particle of particles){particle.x+=particle.vx*dt;particle.y+=particle.vy*dt;particle.vy+=300*dt;particle.life-=dt}particles=particles.filter(q=>q.life>0);if(p.grounded&&Math.abs(p.vx)>160&&Math.random()<.22)sparks(p.x+25,p.y+p.h,'#e7d6b1',2);
 cam+=((Math.max(0,Math.min(level.len-W,p.x-W*.32+p.face*45)))-cam)*Math.min(1,dt*5);shake=Math.max(0,shake-dt*30);
 }
-function finishStage(){running=false;stageDone=true;const total=score+coins*10+bones*15+Math.ceil(gameTime);saved.bests[stage]=Math.max(saved.bests[stage]||0,total);saved.unlocked=Math.max(saved.unlocked,Math.min(6,stage+2));persist();beep(900,.28);modal(stage===5?'🏆 MISSÃO FINAL CUMPRIDA!':'🎉 FASE CONCLUÍDA!',`Estrelas: ${stars}/5 · Moedas: ${coins} · Ossos: ${bones} · Pontos: ${total}`,[...(stage<5?[['➡️ Próxima fase',()=>launch(stage+1)]]:[]),['🗺️ Fases',levelsPage],['🏠 Menu',()=>page('menu')]])}
+function congratulateJoaoGuilherme(){
+ const message='Parabéns, João Guilherme! Você passou de fase!';
+ try{
+  if(!('speechSynthesis' in window))return;
+  window.speechSynthesis.cancel();
+  const utterance=new SpeechSynthesisUtterance(message);
+  utterance.lang='pt-BR';
+  utterance.rate=0.88;
+  utterance.pitch=1.12;
+  utterance.volume=1;
+  const voices=window.speechSynthesis.getVoices();
+  const brazilian=voices.find(v=>v.lang.toLowerCase()==='pt-br')||voices.find(v=>v.lang.toLowerCase().startsWith('pt'));
+  if(brazilian)utterance.voice=brazilian;
+  window.speechSynthesis.speak(utterance);
+ }catch(e){console.warn('Voz de parabéns indisponível:',e)}
+}
+function finishStage(){running=false;stageDone=true;congratulateJoaoGuilherme();const total=score+coins*10+bones*15+Math.ceil(gameTime);saved.bests[stage]=Math.max(saved.bests[stage]||0,total);saved.unlocked=Math.max(saved.unlocked,Math.min(6,stage+2));persist();beep(900,.28);modal(stage===5?'🏆 MISSÃO FINAL CUMPRIDA!':'🎉 FASE CONCLUÍDA!',`🎉 Parabéns, João Guilherme! Você passou de fase!\n\nEstrelas: ${stars}/5 · Moedas: ${coins} · Ossos: ${bones} · Pontos: ${total}`,[...(stage<5?[['➡️ Próxima fase',()=>launch(stage+1)]]:[]),['🗺️ Fases',levelsPage],['🏠 Menu',()=>page('menu')]])}
 function drawRect(x,y,w,h,c){g.fillStyle=c;g.fillRect(x,y,w,h)}function round(x,y,w,h,r,c){g.fillStyle=c;g.beginPath();g.roundRect(x,y,w,h,r);g.fill()}
 function cloud(x,y,s){g.fillStyle='#fffbe9c9';for(const [a,b,r] of [[0,0,23],[23,-10,29],[51,0,22]]){g.beginPath();g.ellipse(x+a*s,y+b*s,r*s,r*.66*s,0,0,TAU);g.fill()}}
 
