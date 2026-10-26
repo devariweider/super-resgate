@@ -1,0 +1,18 @@
+PATRULHA CANINA — SUPER RESGATE DELUXE (CORREÇÃO DE PERSONAGENS E CENÁRIO)
+
+INSTALAÇÃO:
+1. Extraia o ZIP.
+2. Copie index.html, game.js, style.css e a pasta assets para D:\GPATROLPAW.
+3. Substitua os arquivos antigos e mantenha a estrutura das pastas.
+4. Abra index.html no Chrome ou Edge e pressione Ctrl+F5 se necessário.
+
+CORREÇÕES:
+- 8 quadros de corrida/caminhada para cada um dos 6 filhotes (48 PNGs).
+- PNGs com transparência real extraídos diretamente do atlas original RGBA.
+- Remoção dos fragmentos de personagens vizinhos que apareciam nos recortes.
+- Cenário da Baía com panorâmica mais suave, sem duplicar a Torre e sem esticar a imagem.
+- Sem alterar a física, os comandos, as fases e os poderes da versão Deluxe.
+
+OBSERVAÇÃO:
+Verificada sintaxe JavaScript; a abertura no Chromium automatizado foi bloqueada
+pelo ambiente, portanto não há validação visual completa do jogo no navegador.
