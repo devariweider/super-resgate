@@ -7,11 +7,54 @@ const THEMES=[{name:'BAÍA DA AVENTURA',sky:['#69c8ff','#d6f8ff'],soil:'#94552c'
 const sprites=HEROES.map(h=>Array.from({length:8},(_,i)=>{const img=new Image();img.decoding='async';img.src='assets/characters/'+h[1]+'_'+i+'.png';return img}));
 const saveKey='patrol-super-resgate-master-v1';let saved={unlocked:1,bests:[0,0,0,0,0,0],hero:0};try{Object.assign(saved,JSON.parse(localStorage.getItem(saveKey)||'{}'))}catch{}
 let hero=Math.min(5,Math.max(0,saved.hero|0)),stage=0,level,player,cam=0,gameTime=0,score=0,coins=0,bones=0,stars=0,shield=0,particles=[],running=false,paused=false,overlay=false,last=0,raf=0,toastUntil=0,wasJump=false,wasPower=false,gameOver=false,stageDone=false,shake=0,checkpoint=70;
-const held=new Set();let musicOn=false,sfxOn=true,audio=null,musicTick=0,musicIndex=0;const melodies=[[0,4,7,9,7,4,2,4],[0,2,5,7,9,7,5,2],[0,3,7,10,7,3,5,7],[0,4,7,12,7,4,2,0],[0,5,9,7,5,4,2,0],[0,3,5,8,7,5,3,0]];
+const held=new Set();let musicOn=true,sfxOn=true,audio=null,musicTick=0,musicIndex=0;
+const melodies=[
+ [0,4,7,12,11,7,9,7, 5,9,12,16,14,12,9,7],
+ [0,3,7,10,12,10,7,3, 5,8,12,15,14,12,8,7],
+ [0,3,7,8,10,8,7,3, 0,5,8,12,10,8,5,3],
+ [0,4,7,12,14,12,11,7, 5,9,12,16,17,16,12,9],
+ [0,4,9,12,16,14,12,9, 7,11,14,19,16,14,11,7],
+ [0,3,7,12,15,12,10,7, 5,8,12,17,15,12,8,7]
+];
+const chords=[[0,4,7],[0,3,7],[0,3,7],[0,4,7],[0,4,9],[0,3,7]];
 function persist(){saved.hero=hero;try{localStorage.setItem(saveKey,JSON.stringify(saved))}catch{}}
 function audioStart(){try{audio??=new(window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume()}catch{}}
 function beep(freq=500,dur=.09,type='sine',volume=.045){if(!sfxOn||!audio)return;const o=audio.createOscillator(),v=audio.createGain();o.type=type;o.frequency.value=freq;v.gain.setValueAtTime(volume,audio.currentTime);v.gain.exponentialRampToValueAtTime(.001,audio.currentTime+dur);o.connect(v);v.connect(audio.destination);o.start();o.stop(audio.currentTime+dur)}
-function tune(dt){if(!musicOn||!audio||paused||!running)return;musicTick-=dt;if(musicTick>0)return;musicTick=.26;const note=melodies[stage][musicIndex++%8],o=audio.createOscillator(),v=audio.createGain();o.type='triangle';o.frequency.value=261.63*Math.pow(2,note/12);v.gain.setValueAtTime(.018,audio.currentTime);v.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+.21);o.connect(v);v.connect(audio.destination);o.start();o.stop(audio.currentTime+.22)}
+// Trilha orquestral sintetizada em tempo real: sem downloads nem arquivos externos.
+function musicNote(semitone,duration=.22,wave='triangle',volume=.018,octave=0){
+ if(!audio||audio.state!=='running')return;
+ const now=audio.currentTime;
+ const osc=audio.createOscillator(),gain=audio.createGain();
+ osc.type=wave;osc.frequency.setValueAtTime(220*Math.pow(2,(semitone+octave*12)/12),now);
+ gain.gain.setValueAtTime(.0001,now);
+ gain.gain.exponentialRampToValueAtTime(Math.max(.0002,volume),now+.025);
+ gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
+ osc.connect(gain);gain.connect(audio.destination);osc.start(now);osc.stop(now+duration+.02);
+}
+function musicDrum(strong){
+ if(!audio||audio.state!=='running')return;
+ const now=audio.currentTime,osc=audio.createOscillator(),gain=audio.createGain();
+ osc.type='sine';osc.frequency.setValueAtTime(strong?130:220,now);
+ osc.frequency.exponentialRampToValueAtTime(strong?46:95,now+.10);
+ gain.gain.setValueAtTime(strong?.022:.008,now);
+ gain.gain.exponentialRampToValueAtTime(.0001,now+.13);
+ osc.connect(gain);gain.connect(audio.destination);osc.start(now);osc.stop(now+.15);
+}
+function tune(dt){
+ if(!musicOn||!audio||audio.state!=='running'||paused||!running)return;
+ musicTick-=dt;if(musicTick>0)return;
+ const beat=musicIndex++%16,theme=stage%6,notes=melodies[theme],root=[-5,-7,-9,-5,-2,-9][theme];
+ const interval=theme===5?.205:.235;
+ musicTick+=interval;if(musicTick<0)musicTick=interval;
+ musicNote(root+notes[beat]+12,interval*.93,'triangle',.017);
+ if(beat%2===0)musicNote(root+notes[beat]+24,interval*.72,'sine',.004);
+ if(beat%4===0){
+   const progression=[0,5,7,5][Math.floor(beat/4)];
+   musicNote(root+progression-12,interval*3.6,'sawtooth',.009);
+   for(const chordNote of chords[theme])musicNote(root+progression+chordNote,interval*3.4,'triangle',.004);
+ }
+ if(beat%2===0)musicDrum(beat%4===0);
+}
 $('music').onclick=()=>{audioStart();musicOn=!musicOn;$('music').textContent='♫ Música: '+(musicOn?'ON':'OFF')};$('sfx').onclick=()=>{audioStart();sfxOn=!sfxOn;$('sfx').textContent='🔊 Efeitos: '+(sfxOn?'ON':'OFF')};
 function page(name){for(const id of ['menu','levels','play'])$(id).hidden=id!==name;$('overlay').hidden=true;overlay=false}
 function announce(text,ms=1200){$('toast').textContent=text;toastUntil=performance.now()+ms}
@@ -99,7 +142,7 @@ function congratulateJoaoGuilherme(){
   window.speechSynthesis.speak(utterance);
  }catch(e){console.warn('Voz de parabéns indisponível:',e)}
 }
-function finishStage(){running=false;stageDone=true;congratulateJoaoGuilherme();const total=score+coins*10+bones*15+Math.ceil(gameTime);saved.bests[stage]=Math.max(saved.bests[stage]||0,total);saved.unlocked=Math.max(saved.unlocked,Math.min(6,stage+2));persist();beep(900,.28);modal(stage===5?'🏆 MISSÃO FINAL CUMPRIDA!':'🎉 FASE CONCLUÍDA!',`🎉 Parabéns, João Guilherme! Você passou de fase!\n\nEstrelas: ${stars}/5 · Moedas: ${coins} · Ossos: ${bones} · Pontos: ${total}`,[...(stage<5?[['➡️ Próxima fase',()=>launch(stage+1)]]:[]),['🗺️ Fases',levelsPage],['🏠 Menu',()=>page('menu')]])}
+function finishStage(){running=false;stageDone=true;musicTick=0;congratulateJoaoGuilherme();const total=score+coins*10+bones*15+Math.ceil(gameTime);saved.bests[stage]=Math.max(saved.bests[stage]||0,total);saved.unlocked=Math.max(saved.unlocked,Math.min(6,stage+2));persist();beep(900,.28);modal(stage===5?'🏆 MISSÃO FINAL CUMPRIDA!':'🎉 FASE CONCLUÍDA!',`🎉 Parabéns, João Guilherme! Você passou de fase!\n\nEstrelas: ${stars}/5 · Moedas: ${coins} · Ossos: ${bones} · Pontos: ${total}`,[...(stage<5?[['➡️ Próxima fase',()=>launch(stage+1)]]:[]),['🗺️ Fases',levelsPage],['🏠 Menu',()=>page('menu')]])}
 function drawRect(x,y,w,h,c){g.fillStyle=c;g.fillRect(x,y,w,h)}function round(x,y,w,h,r,c){g.fillStyle=c;g.beginPath();g.roundRect(x,y,w,h,r);g.fill()}
 function cloud(x,y,s){g.fillStyle='#fffbe9c9';for(const [a,b,r] of [[0,0,23],[23,-10,29],[51,0,22]]){g.beginPath();g.ellipse(x+a*s,y+b*s,r*s,r*.66*s,0,0,TAU);g.fill()}}
 
