@@ -1,0 +1,47 @@
+name: Descompactar jogo ZIP
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'GPATROLPAW-Tela-Inteira-Responsiva.zip'
+      - '.github/workflows/extract-game.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+      - name: Extrair jogo para a raiz do repositório
+        run: |
+          set -e
+          mkdir -p /tmp/super-resgate-extracted
+          unzip -q -o GPATROLPAW-Tela-Inteira-Responsiva.zip -d /tmp/super-resgate-extracted
+          echo "Arquivos encontrados:"
+          find /tmp/super-resgate-extracted -maxdepth 3 -type f | head -50
+          if [ -f /tmp/super-resgate-extracted/index.html ]; then
+            SOURCE=/tmp/super-resgate-extracted
+          else
+            SOURCE="$(find /tmp/super-resgate-extracted -name index.html -type f -print -quit | xargs -r dirname)"
+          fi
+          if [ -z "$SOURCE" ] || [ ! -f "$SOURCE/index.html" ]; then
+            echo "::error::ZIP sem index.html. Extração interrompida."
+            exit 1
+          fi
+          cp -R "$SOURCE"/. .
+          test -f index.html
+          test -f game.js
+          test -f style.css
+      - name: Salvar arquivos descompactados no GitHub
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html game.js style.css assets/ || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Extrair arquivos do jogo e sprites do ZIP"
+            git push
+          else
+            echo "Nenhuma alteração a salvar."
+          fi
