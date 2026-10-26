@@ -198,5 +198,31 @@ const p=player,frame=sprites[hero][p.grounded&&Math.abs(p.vx)>18?Math.floor(p.an
 g.restore()}
 function render(t){g.save();if(shake)g.translate(R(-shake,shake),R(-shake,shake));backdrop(t);drawWorld(t);g.restore();if(paused){drawRect(0,0,W,H,'#081d4677');g.fillStyle='white';g.textAlign='center';g.font='bold 44px system-ui';g.fillText('PAUSADO',W/2,H/2)}if(performance.now()>toastUntil)$('toast').textContent=''}
 function loop(t){if(!running)return;const dt=Math.min(.033,Math.max(0,(t-last)/1000));last=t;if(!paused&&!overlay){gameTime-=dt;tune(dt);physics(dt);if(gameTime<=0){gameTime=0;hurt();if(running)gameTime=120}updateHud()}render(t);if(running)raf=requestAnimationFrame(loop)}
+
+/* Menu com controle USB/Bluetooth: analógico ou direcional escolhe filhote;
+   botão Y (índice 3 no mapeamento padrão) começa a aventura. */
+let menuPadPreviousDirection=0,menuPadPreviousY=false,menuPadNextMove=0;
+function menuGamepad(t){
+ const p=navigator.getGamepads?.()?.find(q=>q&&q.connected);
+ if(!p){menuPadPreviousDirection=0;menuPadPreviousY=false;return}
+ const menuVisible=!$('menu').hidden&&!running&&!overlay;
+ if(!menuVisible){menuPadPreviousDirection=0;menuPadPreviousY=!!p.buttons[3]?.pressed;return}
+ const axis=p.axes[0]||0;
+ const direction=(axis>.55||p.buttons[15]?.pressed)?1:(axis<-.55||p.buttons[14]?.pressed)?-1:0;
+ if(direction&&(direction!==menuPadPreviousDirection||t>=menuPadNextMove)){
+   chooseHero((hero+direction+HEROES.length)%HEROES.length);
+   menuPadNextMove=t+260;
+   const selected=$('heroes').children[hero];
+   selected?.focus({preventScroll:true});
+ }
+ if(!direction)menuPadNextMove=0;
+ menuPadPreviousDirection=direction;
+ const yPressed=!!p.buttons[3]?.pressed;
+ if(yPressed&&!menuPadPreviousY){launch(0)}
+ menuPadPreviousY=yPressed;
+}
+function menuLoop(t){menuGamepad(t);requestAnimationFrame(menuLoop)}
+requestAnimationFrame(menuLoop);
+
 page('menu');
 })();
