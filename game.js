@@ -24,7 +24,27 @@ $('levelsBtn').onclick=levelsPage;$('backLevels').onclick=()=>page('menu');$('st
 function pauseGame(){if(!running||overlay)return;paused=true;modal('⏸ Jogo pausado','Escolha como continuar.',[['▶ Continuar',()=>{paused=false;last=performance.now()}],['🔄 Reiniciar fase',()=>launch(stage)],['🐾 Trocar filhote',()=>{running=false;paused=false;page('menu')}],['🏠 Início',()=>{running=false;paused=false;page('menu')}]])}
 window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowleft','arrowright','arrowup','arrowdown',' ','a','d','w','s','shift','e','escape','enter'].includes(k)){e.preventDefault();if(k==='escape'){if(running&&!overlay)pauseGame();else if(overlay&&paused){$('overlay').hidden=true;overlay=false;paused=false}}else held.add(k)}});window.addEventListener('keyup',e=>held.delete(e.key.toLowerCase()));window.addEventListener('blur',()=>held.clear());
 document.querySelectorAll('[data-key]').forEach(b=>{const key=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();audioStart();held.add(key);b.setPointerCapture(e.pointerId)});for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>held.delete(key))});
-function pad(){const p=navigator.getGamepads?.()?.find(q=>q&&q.connected);if(!p)return {x:0,j:false,p:false};return{x:(Math.abs(p.axes[0]||0)>.24?p.axes[0]:0)+(p.buttons[15]?.pressed?1:0)-(p.buttons[14]?.pressed?1:0),j:!!(p.buttons[0]?.pressed||p.buttons[12]?.pressed),p:!!(p.buttons[2]?.pressed||p.buttons[1]?.pressed)}}
+// Leitura única e defensiva do controle; aceita eixos analógicos, direcional digital e D-pad em eixos.
+function activePad(){
+ try {const pads=navigator.getGamepads?.();return pads?Array.from(pads).find(p=>p&&p.connected)||null:null}
+ catch{return null}
+}
+function padDirection(p){
+ if(!p)return 0;
+ const buttons=p.buttons||[];
+ const axis=Number(p.axes?.[0]||0);
+ const digital=(buttons[15]?.pressed?1:0)-(buttons[14]?.pressed?1:0);
+ if(digital)return digital;
+ if(Math.abs(axis)>.25)return Math.sign(axis);
+ // Alguns controles genéricos expõem o direcional no eixo 6.
+ const hat=Number(p.axes?.[6]||0);
+ if(Math.abs(hat)>.65&&Math.abs(hat)<=1)return Math.sign(hat);
+ return 0;
+}
+function pad(){const p=activePad();if(!p)return {x:0,j:false,p:false};
+ const b=p.buttons||[];
+ return{x:padDirection(p),j:!!(b[0]?.pressed||b[12]?.pressed),p:!!(b[2]?.pressed||b[1]?.pressed)};
+}
 function control(){const gp=pad(),k=(...a)=>a.some(v=>held.has(v));return{x:Math.max(-1,Math.min(1,gp.x+(k('right','arrowright','d')?1:0)-(k('left','arrowleft','a')?1:0))),jump:gp.j||k('jump',' ','w','arrowup','up'),power:gp.p||k('power','e'),run:k('shift'),down:k('arrowdown','s')}}
 const R=(a,b)=>a+Math.random()*(b-a),overlap=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
 function buildLevel(i){const len=3200+i*270,ground=453,holes=[],platforms=[],blocks=[],items=[],enemies=[],hazards=[],bridges=[];
@@ -203,25 +223,28 @@ function loop(t){if(!running)return;const dt=Math.min(.033,Math.max(0,(t-last)/1
    botão Y (índice 3 no mapeamento padrão) começa a aventura. */
 let menuPadPreviousDirection=0,menuPadPreviousY=false,menuPadNextMove=0;
 function menuGamepad(t){
- const p=navigator.getGamepads?.()?.find(q=>q&&q.connected);
+ const p=activePad();
  if(!p){menuPadPreviousDirection=0;menuPadPreviousY=false;return}
- const menuVisible=!$('menu').hidden&&!running&&!overlay;
- if(!menuVisible){menuPadPreviousDirection=0;menuPadPreviousY=!!p.buttons[3]?.pressed;return}
- const axis=p.axes[0]||0;
- const direction=(axis>.55||p.buttons[15]?.pressed)?1:(axis<-.55||p.buttons[14]?.pressed)?-1:0;
+ const yPressed=!!p.buttons?.[3]?.pressed; // Y no mapeamento padrão do navegador
+ const menuVisible=!$('menu').hidden&&!overlay;
+ if(!menuVisible){menuPadPreviousDirection=0;menuPadPreviousY=yPressed;return}
+ const direction=padDirection(p);
  if(direction&&(direction!==menuPadPreviousDirection||t>=menuPadNextMove)){
    chooseHero((hero+direction+HEROES.length)%HEROES.length);
-   menuPadNextMove=t+260;
-   const selected=$('heroes').children[hero];
-   selected?.focus({preventScroll:true});
+   menuPadNextMove=t+280;
+   $('heroes').children[hero]?.focus({preventScroll:true});
  }
  if(!direction)menuPadNextMove=0;
  menuPadPreviousDirection=direction;
- const yPressed=!!p.buttons[3]?.pressed;
- if(yPressed&&!menuPadPreviousY){launch(0)}
+ if(yPressed&&!menuPadPreviousY){audioStart();launch(0)}
  menuPadPreviousY=yPressed;
 }
-function menuLoop(t){menuGamepad(t);requestAnimationFrame(menuLoop)}
+function menuLoop(t){
+ try{menuGamepad(t)}catch(e){console.warn('Leitura do controle:',e)}
+ requestAnimationFrame(menuLoop);
+}
+window.addEventListener('gamepadconnected',()=>{menuPadPreviousDirection=0;menuPadPreviousY=false});
+window.addEventListener('gamepaddisconnected',()=>{menuPadPreviousDirection=0;menuPadPreviousY=false});
 requestAnimationFrame(menuLoop);
 
 page('menu');
