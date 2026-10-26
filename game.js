@@ -98,11 +98,42 @@ for(let n=0;n<7+i;n++){const x=380+n*340;if(x<len-200){blocks.push({x,y:ground-1
 for(let n=0;n<3+i;n++){const x=850+n*620;if(x<len-200)hazards.push({x,y:ground-27,w:58,h:27,type:i===2||i===5?'fire':'spikes'})}
 if(i===0||i===4||i===5)for(const hole of holes)bridges.push({x:hole.x-15,y:ground-8,w:hole.w+30,h:11,rope:true});
 if(i===5)enemies.push({x:len-340,y:ground-100,w:95,h:90,base:len-340,range:110,dir:-1,type:'boss',alive:true,hp:4,phase:0});
+
+/* Corrige obstáculos sobrepostos: blocos sempre sobre chão seguro;
+   fogo/espinhos nunca embaixo dos blocos ou dentro de buracos;
+   ossos e demais itens não podem ficar escondidos atrás dos blocos. */
+const intersectsX=(x,w,a,pad=0)=>x<a.x+a.w+pad&&x+w>a.x-pad;
+const onHole=(x,w)=>holes.some(h=>intersectsX(x,w,h,20));
+for(const block of blocks){
+ let attempts=0;
+ while(attempts++<28&&(onHole(block.x,block.w)||blocks.some(other=>other!==block&&Math.abs(other.x-block.x)<65))){
+   block.x+=75;
+   if(block.x>len-170)block.x=120+attempts*21;
+ }
+}
+for(const hazard of hazards){
+ let attempts=0;
+ while(attempts++<45&&(onHole(hazard.x,hazard.w)||blocks.some(b=>intersectsX(hazard.x,hazard.w,b,65))||hazards.some(other=>other!==hazard&&intersectsX(hazard.x,hazard.w,other,35)))){
+   hazard.x+=93;
+   if(hazard.x>len-180)hazard.x=160+attempts*37;
+ }
+ if(onHole(hazard.x,hazard.w)||blocks.some(b=>intersectsX(hazard.x,hazard.w,b,40)))hazard.disabled=true;
+}
+for(const item of items){
+ if(!blocks.some(b=>Math.abs(item.x-(b.x+b.w/2))<42&&Math.abs(item.y-(b.y+b.h/2))<65))continue;
+ // Ossos e moedas ficam acima da plataforma, afastados do bloco.
+ const supporting=platforms.find(p=>item.x>=p.x&&item.x<=p.x+p.w);
+ if(supporting)item.y=supporting.y-65;
+ else item.y=ground-205;
+ let tries=0;
+ while(tries++<10&&blocks.some(b=>Math.abs(item.x-(b.x+b.w/2))<42&&Math.abs(item.y-(b.y+b.h/2))<55))item.x+=28;
+}
+
 return {len,ground,holes,platforms,blocks,items,enemies,hazards,bridges,goal:{x:len-95,y:ground-95,w:70,h:95},checkpoint:{x:Math.floor(len*.52),active:false}}}
-function launch(i){audioStart();stageDone=false;stage=i;level=buildLevel(stage);player={x:65,y:level.ground-76,w:58,h:76,vx:0,vy:0,grounded:false,face:1,anim:0,lives:3,invuln:0,power:'',powerTime:0,ability:0,glide:0,coyote:0,jumpBuffer:0,doubleJump:false,score:0};score=0;coins=0;bones=0;stars=0;shield=0;cam=0;gameTime=240;checkpoint=65;particles=[];shake=0;gameOver=false;stageDone=false;running=true;paused=false;wasJump=false;wasPower=false;musicIndex=0;musicTick=0;page('play');updateHud();announce('🐾 '+THEMES[stage].name+' — Encontre 5 estrelas!',2200);last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
+function launch(i){audioStart();stageDone=false;gameOver=false;stage=i;level=buildLevel(stage);player={x:65,y:level.ground-76,w:58,h:76,vx:0,vy:0,grounded:false,face:1,anim:0,lives:3,invuln:0,power:'',powerTime:0,ability:0,glide:0,coyote:0,jumpBuffer:0,doubleJump:false,score:0};score=0;coins=0;bones=0;stars=0;shield=0;cam=0;gameTime=240;checkpoint=65;particles=[];shake=0;gameOver=false;stageDone=false;running=true;paused=false;wasJump=false;wasPower=false;musicIndex=0;musicTick=0;page('play');updateHud();announce('🐾 '+THEMES[stage].name+' — Encontre 5 estrelas!',2200);last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
 function updateHud(){$('hudHero').textContent=HEROES[hero][0].toUpperCase();$('hudLives').textContent='❤️'.repeat(Math.max(0,player.lives));$('hudItems').textContent=`⭐ ${stars}/5 · 🦴 ${bones} · 🪙 ${coins} · 🛡️ ${shield}`;$('hudLevel').textContent='FASE 1-'+(stage+1)+' '+THEMES[stage].name;$('hudTime').textContent='⏱ '+Math.max(0,Math.ceil(gameTime))}
 function sparks(x,y,color,count=12){for(let i=0;i<count;i++)particles.push({x,y,vx:R(-170,170),vy:R(-220,10),life:R(.25,.8),color,size:R(3,7)})}
-function hurt(){if(player.invuln>0)return;if(shield){shield--;player.invuln=1.1;beep(650,.16);announce('🛡️ Escudo protegeu!');updateHud();return}player.lives--;player.invuln=1.8;shake=9;beep(155,.3,'sawtooth');sparks(player.x+30,player.y+30,'#ff7777');updateHud();if(player.lives<=0){running=false;gameOver=true;modal('💙 Tente novamente!','Você foi muito corajoso! Quer repetir esta fase?',[['🔄 Tentar de novo',()=>launch(stage)],['🏠 Menu',()=>page('menu')]])}else{player.x=checkpoint;player.y=level.ground-140;player.vx=0;player.vy=0;announce('Vamos tentar mais uma vez!')}}
+function hurt(){if(player.invuln>0)return;if(shield){shield--;player.invuln=1.1;beep(650,.16);announce('🛡️ Escudo protegeu!');updateHud();return}player.lives--;player.invuln=1.8;shake=9;beep(155,.3,'sawtooth');sparks(player.x+30,player.y+30,'#ff7777');updateHud();if(player.lives<=0){running=false;gameOver=true;menuPadPreviousY=!!activePad()?.buttons?.[3]?.pressed;modal('💙 Tente novamente!','Você foi muito corajoso! Aperte Y para tentar novamente.',[['🎮 Y — Tentar de novo',()=>launch(stage)],['🏠 Menu',()=>page('menu')]])}else{player.x=checkpoint;player.y=level.ground-140;player.vx=0;player.vy=0;announce('Vamos tentar mais uma vez!')}}
 function give(type){if(type==='heart')player.lives=Math.min(3,player.lives+1);else if(type==='shield')shield++;else if(type==='coin')coins+=5;else{player.power=type;player.powerTime=12}beep(900,.17);announce(({speed:'⚡ Supervelocidade!',shield:'🛡️ Escudo!',jump:'🚀 Superpulo!',magnet:'🧲 Ímã!',heart:'❤️ Vida extra!',coin:'🪙 +5 moedas!'})[type]||'Poder!');updateHud()}
 function useAbility(dt,inp){player.ability=Math.max(0,player.ability-dt);if(hero===2&&inp.jump&&player.vy>0&&player.glide>0){player.vy=Math.min(player.vy,65);player.glide-=dt}if(hero===5&&level.holes.some(h=>h.water&&player.x+player.w/2>h.x&&player.x+player.w/2<h.x+h.w)&&player.y>level.ground-15){player.vy=Math.max(-110,player.vy-1400*dt)}if(inp.power&&!wasPower&&player.ability===0){player.ability=4;switch(hero){case 0:player.power='speed';player.powerTime=4;announce('⚡ Chase acelerou!');break;case 1:level.hazards.filter(h=>h.type==='fire'&&Math.abs(h.x-player.x)<220).forEach(h=>h.disabled=true);announce('💦 Marshall apagou o fogo!');break;case 2:player.glide=3;player.vy=-210;announce('🪽 Skye vai planar!');break;case 3:level.blocks.filter(b=>b.type==='brick'&&Math.abs(b.x-player.x)<150).forEach(b=>{b.broken=true;sparks(b.x,b.y,'#bd7e4a')});announce('🔨 Rubble quebrou os tijolos!');break;case 4:level.holes.filter(h=>Math.abs(h.x-player.x)<220).forEach(h=>level.bridges.push({x:h.x-5,y:level.ground-6,w:h.w+10,h:12,temp:7}));announce('🛠️ Rocky construiu uma ponte!');break;case 5:player.vy=-300;player.invuln=.8;announce('🌊 Zuma: impulso aquático!');break}beep(700,.12)}wasPower=inp.power}
 function physics(dt){const inp=control(),p=player;useAbility(dt,inp);p.invuln=Math.max(0,p.invuln-dt);p.powerTime=Math.max(0,p.powerTime-dt);if(!p.powerTime)p.power='';p.glide=Math.max(0,p.glide-dt*.07);p.jumpBuffer=inp.jump&&!wasJump?.14:Math.max(0,p.jumpBuffer-dt);wasJump=inp.jump;
@@ -287,6 +318,13 @@ function menuGamepad(t){
  const yPressed=!!p.buttons?.[3]?.pressed; // Y no mapeamento padrão do navegador
  const menuVisible=!$('menu').hidden&&!overlay;
  const victoryVisible=stageDone&&overlay&&!$('overlay').hidden;
+ const retryVisible=gameOver&&overlay&&!$('overlay').hidden;
+ if(retryVisible){
+   if(yPressed&&!menuPadPreviousY)launch(stage);
+   menuPadPreviousY=yPressed;
+   menuPadPreviousDirection=0;
+   return;
+ }
  if(victoryVisible){
    if(yPressed&&!menuPadPreviousY){
      if(stage<5)launch(stage+1);
