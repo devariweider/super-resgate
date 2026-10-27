@@ -212,6 +212,7 @@ window.addEventListener('keydown', e => {
   }
   if (k === 'p' && running && !overlayOpen) { e.preventDefault(); togglePause(); return; }
   if (k === 'r' && running && !overlayOpen) { e.preventDefault(); launch(stage); return; }
+  if (k === 'enter' && triggerAdvance()) { e.preventDefault(); return; }
   if (k === 'enter' && !$('menu').hidden) { e.preventDefault(); launch(0); return; }
   const a = KEYMAP[k];
   if (a) {
@@ -233,6 +234,22 @@ function overflowPause() {
   return true;
 }
 
+function triggerAdvance() {
+  if (!overlayOpen || !overlayAdvance) return false;
+  const go = overlayAdvance;
+  closeOverlay();
+  go();
+  return true;
+}
+
+// Botão Y (índice 3) avança a tela de fase concluída, mesmo com o jogo parado.
+let padAdvancePrev = false;
+setInterval(() => {
+  const pressed = readPad().advance;
+  if (pressed && !padAdvancePrev && overlayOpen && overlayAdvance && performance.now() - overlayShownAt > 250) triggerAdvance();
+  padAdvancePrev = pressed;
+}, 60);
+
 document.querySelectorAll('[data-action]').forEach(btn => {
   const action = btn.dataset.action;
   const down = e => {
@@ -252,16 +269,23 @@ function readPad() {
   try {
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];
     const p = Array.from(pads).find(q => q && q.connected);
-    if (!p) return { x:0, jump:false, power:false, run:false };
+    if (!p) return { x:0, jump:false, power:false, run:false, advance:false };
     const ax = p.axes && p.axes[0] || 0;
     const x = (Math.abs(ax) > .24 ? ax : 0) + (p.buttons[15] && p.buttons[15].pressed ? 1 : 0) - (p.buttons[14] && p.buttons[14].pressed ? 1 : 0);
     return {
       x: clamp(x, -1, 1),
       jump: !!(p.buttons[0] && p.buttons[0].pressed || p.buttons[12] && p.buttons[12].pressed),
       power: !!(p.buttons[2] && p.buttons[2].pressed || p.buttons[1] && p.buttons[1].pressed),
-      run: !!(p.buttons[10] && p.buttons[10].pressed)
+      run: !!(p.buttons[10] && p.buttons[10].pressed),
+      advance: !!(p.buttons[3] && p.buttons[3].pressed)
     };
-  } catch (e) { return { x:0, jump:false, power:false, run:false }; }
+  } catch (e) { return { x:0, jump:false, power:false, run:false, advance:false }; }
+}
+
+function hasPad() {
+  try {
+    return !!Array.from(navigator.getGamepads ? navigator.getGamepads() : []).find(p => p && p.connected);
+  } catch (e) { return false; }
 }
 
 function readInput() {
@@ -636,6 +660,7 @@ function showPage(name) {
   const ov = $('overlay');
   if (ov) ov.hidden = true;
   overlayOpen = false;
+  overlayAdvance = null;
   if (name !== 'play') window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -733,7 +758,12 @@ function openLevels() {
   showPage('levels');
 }
 
+let overlayAdvance = null;
+let overlayShownAt = 0;
+
 function openDialog(title, text, rating, buttons) {
+  overlayAdvance = null;
+  overlayShownAt = performance.now();
   overlayOpen = true;
   $('overlay').hidden = false;
   $('overlayTitle').textContent = title;
@@ -764,6 +794,7 @@ function openDialog(title, text, rating, buttons) {
 
 function closeOverlay() {
   overlayOpen = false;
+  overlayAdvance = null;
   $('overlay').hidden = true;
 }
 
@@ -816,12 +847,16 @@ function finishLevel() {
   buttons.push({ label: 'Jogar de novo', fn: () => launch(stage) });
   buttons.push({ label: 'Mapa de fases', fn: () => { stopGame(); openLevels(); } });
   buttons.push({ label: 'Menu', fn: () => { stopGame(); showPage('menu'); } });
+  const hint = hasPad() ? 'Controle: botão Y avança' : 'Teclado: Enter avança';
   openDialog(
     stage === 5 ? '🏆 MISSÃO CUMPRIDA!' : '🎉 FASE CONCLUÍDA!',
-    `<b>${name}</b><br>⭐ ${stars}/5 estrelas &nbsp; · &nbsp; 🦴 ${bones} &nbsp; · &nbsp; 🪙 ${coins} &nbsp; · &nbsp; ❤️ ${lives}<br>Tempo restante: ${Math.ceil(gameTime)}s &nbsp; · &nbsp; Pontos: <b>${total}</b>`,
+    `<b>${name}</b><br>⭐ ${stars}/5 estrelas &nbsp; · &nbsp; 🦴 ${bones} &nbsp; · &nbsp; 🪙 ${coins} &nbsp; · &nbsp; ❤️ ${lives}<br>Tempo restante: ${Math.ceil(gameTime)}s &nbsp; · &nbsp; Pontos: <b>${total}</b><span class="dialog-hint">${hint}</span>`,
     rating,
     buttons
   );
+  overlayAdvance = stage < 5
+    ? () => launch(stage + 1)
+    : () => { stopGame(); openLevels(); };
 }
 
 /* ---------------- início e loop ---------------- */

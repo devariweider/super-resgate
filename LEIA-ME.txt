@@ -18,10 +18,16 @@ Teclado:
   E ou X .......... poder especial do filhote
   Shift ........... correr
   Esc ............. pausar
-  Enter ........... sair do mapa de fases
+  Enter ........... sair do mapa de fases / próxima fase
 
 Celular/tablet:
   setas na tela (esquerda) + botão de pulo e de poder (direita).
+
+Controle USB (compatível):
+  direcional/analógico ... andar
+  A ou seta para cima ... pular
+  X ou B ................ poder especial
+  Y ..................... próxima fase (na tela de fase concluída)
 
 PERSONAGENS E PODERES
 ---------------------
@@ -66,6 +72,8 @@ DICAS
 - Segure o pulo para alcançar as plataformas mais altas.
 - O botão de poder recarrega sozinho; use nos inimigos e no chefe.
 - Junte moedas rápido para aumentar o combo e ganhar mais pontos.
+- No controle, aperte Y na tela de FASE CONCLUÍDA para ir direto à próxima
+  fase. No teclado, aperte Enter.
 
 ARQUIVOS
 --------

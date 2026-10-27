@@ -435,6 +435,7 @@ button:focus-visible{outline:4px solid #fff;outline-offset:3px}
 .dialog{max-width:500px;width:100%;text-align:center;padding:22px;overflow:visible}
 .dialog h2{margin:0 0 4px;font-size:clamp(22px,3.4vw,32px);font-style:italic;color:#fff;text-shadow:0 3px 0 #042b61}
 .dialog p{margin:10px 0 16px;color:#c9eaff;font-size:13px;line-height:1.55}
+.dialog-hint{display:block;margin-top:9px;font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#ffdf6a}
 .dialog-stars{display:flex;justify-content:center;gap:5px;min-height:0}
 .dialog-stars svg{width:38px;height:38px;fill:var(--gold);filter:drop-shadow(0 3px 0 #9a5c00);animation:pop .5s ease-out both}
 .dialog-stars svg:nth-child(2){animation-delay:.09s}.dialog-stars svg:nth-child(3){animation-delay:.18s}
