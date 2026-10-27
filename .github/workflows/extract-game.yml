@@ -17,8 +17,26 @@ jobs:
       - name: Extrair jogo para a raiz do repositório
         run: |
           set -e
+          # Normaliza o ZIP: o Compress-Archive do Windows grava caminhos com "\",
+          # o que quebra a extração no Linux.
+          python3 - <<'PY'
+          import zipfile
+
+          origem = 'GPATROLPAW-Tela-Inteira-Responsiva.zip'
+          destino = '/tmp/super-resgate.zip'
+
+          with zipfile.ZipFile(origem) as zin, zipfile.ZipFile(destino, 'w', zipfile.ZIP_DEFLATED) as zout:
+              for item in zin.infolist():
+                  if item.is_dir():
+                      continue
+                  nome = item.filename.replace('\\', '/')
+                  zout.writestr(nome, zin.read(item))
+
+          print('ZIP normalizado com caminhos "/".')
+          PY
+          rm -rf /tmp/super-resgate-extracted
           mkdir -p /tmp/super-resgate-extracted
-          unzip -q -o GPATROLPAW-Tela-Inteira-Responsiva.zip -d /tmp/super-resgate-extracted
+          unzip -q -o /tmp/super-resgate.zip -d /tmp/super-resgate-extracted
           echo "Arquivos encontrados:"
           find /tmp/super-resgate-extracted -maxdepth 3 -type f | head -50
           if [ -f /tmp/super-resgate-extracted/index.html ]; then
@@ -38,7 +56,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html game.js style.css assets/ || true
+          git add index.html game.js style.css LEIA-ME.txt assets/ || true
           if ! git diff --cached --quiet; then
             git commit -m "Extrair arquivos do jogo e sprites do ZIP"
             git push
