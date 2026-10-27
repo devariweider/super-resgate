@@ -1,18 +1,80 @@
-PATRULHA CANINA — SUPER RESGATE DELUXE (CORREÇÃO DE PERSONAGENS E CENÁRIO)
+PATRULHA CANINA — SUPER RESGATE DELUXE
+======================================
 
-INSTALAÇÃO:
-1. Extraia o ZIP.
-2. Copie index.html, game.js, style.css e a pasta assets para D:\GPATROLPAW.
-3. Substitua os arquivos antigos e mantenha a estrutura das pastas.
-4. Abra index.html no Chrome ou Edge e pressione Ctrl+F5 se necessário.
+COMO JOGAR
+----------
+1. Abra o arquivo index.html no Chrome, Edge ou Firefox (versão atualizada).
+2. Escolha o filhote na tela inicial (as escolhas ficam salvas no navegador).
+3. Clique em JOGAR para continuar do último mundo liberado ou em
+   "Escolher fase" para ver o mapa com as 6 fases.
+4. Colete as 5 estrelas de cada fase para abrir o portão do RESGATE
+   e chegue até ele para concluir o mundo.
 
-CORREÇÕES:
-- 8 quadros de corrida/caminhada para cada um dos 6 filhotes (48 PNGs).
-- PNGs com transparência real extraídos diretamente do atlas original RGBA.
-- Remoção dos fragmentos de personagens vizinhos que apareciam nos recortes.
-- Cenário da Baía com panorâmica mais suave, sem duplicar a Torre e sem esticar a imagem.
-- Sem alterar a física, os comandos, as fases e os poderes da versão Deluxe.
+CONTROLES
+---------
+Teclado:
+  ← → ou A/D ..... andar
+  Espaço ou W ..... pular (segure para pular mais alto)
+  E ou X .......... poder especial do filhote
+  Shift ........... correr
+  Esc ............. pausar
+  Enter ........... sair do mapa de fases
 
-OBSERVAÇÃO:
-Verificada sintaxe JavaScript; a abertura no Chromium automatizado foi bloqueada
-pelo ambiente, portanto não há validação visual completa do jogo no navegador.
+Celular/tablet:
+  setas na tela (esquerda) + botão de pulo e de poder (direita).
+
+PERSONAGENS E PODERES
+---------------------
+  Chase    (azul)   DASH POLICIAL   — avanço rápido que derruba inimigos.
+  Marshall (vermelho) JATO D'ÁGUA   — apaga fogo em volta e afasta inimigos.
+  Skye     (rosa)   PLANEIO        — segure o pulo para planar.
+  Rubble   (amarelo) ONDA DE CHOQUE — quebra tijolos e derruba inimigos.
+  Rocky    (verde)  PONTE RÁPIDA   — cria uma ponte no próximo buraco.
+  Zuma     (laranja) IMPULSO AQUÁTICO — atravessa a água por alguns segundos.
+
+BLOCOS, ITENS E INIMIGOS
+------------------------
+  ?  Bloco surpresa: dê um pulo com a cabeça para ganhar um prêmio
+     (moedas, vida, escudo, ímã, impulso ou super pulo).
+  🧱 Tijolo: só o Rubble quebra com o poder.
+  🪙 Moeda, 🦴 Osso e ⭐ Estrela somam pontos (as estrelas abrem o portão).
+  🛡️ Escudo protege de um dano.
+  🦀 Caranguejo, 🐦 Gaivota, 🧰 Baú e 🐊 Jacaré (chefe da fase 1-6).
+     Pule na cabeça deles; o jacaré também leva dano com o poder especial.
+  🌊 Água e abismos: tome cuidado (Zuma atravessa a água com o poder).
+  🚩 Bandeira: checkpoint — se cair, volte dali.
+  🚧 Pontes de corda e plataformas móveis ou quebráveis aparecem nas fases.
+
+NOVIDADES DESTA VERSÃO
+----------------------
+- Interface refeita no estilo azul e dourado da Patrulha, com menu, mapa de
+  fases, cartões de heróis, painel de blocos/poderes e painel de inimigos.
+- 6 mundos com tema próprio: Baía, Floresta, Caverna, Neve, Cidade e Torre.
+- Física mais gostosa: pulo variável, coyote time, pulo duplo com prêmio,
+  corrida, dash, plataformas móveis, plataformas que quebram e pontes.
+- Combate: pular na cabeça, dash, jato de água e onda de choque.
+- Chefe jacaré na última fase, com barra de vida e porta que só abre
+  depois das 5 estrelas e do chefe derrotado.
+- Checkpoints, vidas, escudo, combo de moedas (até x5), partículas,
+  tremor de tela, hit-stop e efeitos sonoros sintetizados.
+- HUD responsivo, controles de toque que ficam embaixo da tela no celular
+  em pé e sobre a tela no celular deitado.
+- Progresso, herói escolhido e recordes salvos no navegador.
+
+DICAS
+-----
+- Segure o pulo para alcançar as plataformas mais altas.
+- O botão de poder recarrega sozinho; use nos inimigos e no chefe.
+- Junte moedas rápido para aumentar o combo e ganhar mais pontos.
+
+ARQUIVOS
+--------
+  index.html, style.css, game.js
+  assets/characters/  (48 quadros dos 6 filhotes)
+  assets/textures/    (moeda, estrela, osso, blocos, grama, terra, água...)
+  assets/cenario/     (panorâmica da Baía da Aventura)
+
+OBSERVAÇÃO
+----------
+Projeto de fã, sem fins comerciais. Testado no Chrome e no Edge (desktop e
+emulação de celular). Não é um produto oficial da Nickelodeon.

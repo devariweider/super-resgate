@@ -1,1 +1,199 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1462ba"><title>Patrulha Canina — Super Resgate Deluxe</title><link rel="stylesheet" href="style.css"></head><body><main><header><div class="brand">🐾 SUPER RESGATE <small>DELUXE • AVENTURA 2D</small></div><div class="headbuttons"><button id="music" aria-label="Ativar ou desativar música">♫ Música: ON</button><button id="sfx" aria-label="Ativar ou desativar efeitos">🔊 Efeitos: ON</button></div></header><section id="menu" class="panel"><h1>Escolha seu herói! João Guilherme!</h1><p>Seis filhotes, seis mundos e uma grande missão!</p><div id="heroes"></div><div class="menu-actions"><button class="big" id="start">▶ JOGAR</button><button id="levelsBtn">🗺️ Escolher fase</button></div><p class="help">Setas / A e D: mover · Espaço / W: pular · E: poder especial · Shift: correr · Esc: pausa<br>Controle USB: no menu, use o joystick ou direcional para escolher o filhote e o botão Y para iniciar. Durante o jogo: A para pular e X para usar o poder</p></section><section id="levels" class="panel" hidden><h2>Escolha uma fase</h2><div id="levelCards"></div><button id="backLevels">← Voltar</button></section><section id="play" hidden><div class="hud"><div id="hudHero">CHASE</div><div id="hudLives">❤️❤️❤️</div><div id="hudItems">⭐ 0 · 🦴 0 · 🪙 0</div><div id="hudLevel">FASE 1-1</div><div id="hudTime">⏱ 240</div><button id="pause">⏸</button></div><div class="screen"><canvas id="game" width="960" height="540" aria-label="Jogo de plataforma 2D"></canvas><div id="toast" aria-live="polite"></div><div class="touch"><div class="dpad"><button data-key="left" aria-label="Esquerda">◀</button><button data-key="right" aria-label="Direita">▶</button><button data-key="up" aria-label="Subir">▲</button></div><div class="actions"><button data-key="power" aria-label="Poder especial">🐾 PODER</button><button data-key="jump" aria-label="Pular">⬆ PULAR</button></div></div></div><div class="reference-toolbar"><div><strong>ESCOLHA SEU HERÓI</strong><div id="quickHeroes" class="quick-heroes"></div></div><div class="powers-guide"><strong>BLOCOS E PODERES</strong><div>🟨 Surpresa &nbsp; 🧱 Tijolo &nbsp; ⭐ Velocidade &nbsp; 🔥 Superpulo &nbsp; 🦴 Ímã &nbsp; 🛡️ Escudo</div></div><div class="enemy-guide"><strong>INIMIGOS</strong><div>🕊️ 🦀 🐊 ⚙️</div></div></div><p class="help">Colete as 5 estrelas para abrir o resgate! Acerte os blocos ? por baixo. Use o poder do filhote.</p></section><section id="overlay" class="overlay" hidden><div class="panel dialog"><h2 id="overlayTitle"></h2><p id="overlayText"></p><div id="overlayButtons"></div></div></section><footer>Projeto de fã não oficial • Para diversão infantil • Salva progresso neste navegador</footer></main><script src="game.js" defer></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a4c9b">
+<meta name="description" content="Patrulha Canina — Super Resgate Deluxe: aventura de plataforma 2D com seis filhotes, seis mundos e poderes especiais.">
+<title>Patrulha Canina — Super Resgate Deluxe</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Ícones vetoriais reutilizáveis -->
+<svg class="svg-defs" aria-hidden="true" focusable="false">
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 1.9l3 6.2 6.8.9-4.9 4.8 1.2 6.8-6.1-3.3-6.1 3.3 1.2-6.8L2.2 9l6.8-.9z" fill="currentColor"/></symbol>
+  <symbol id="i-bone" viewBox="0 0 24 24"><path d="M7.2 5.2a2.7 2.7 0 1 0-2.8 4.5l4.4 4.4a2.7 2.7 0 1 0 4.5 2.8 2.7 2.7 0 1 0-2.9-4.5L6 8.1a2.7 2.7 0 0 0 1.2-2.9z" fill="currentColor"/><path d="M7.2 5.2a2.7 2.7 0 1 0-2.8 4.5l4.4 4.4a2.7 2.7 0 1 0 4.5 2.8 2.7 2.7 0 1 0-2.9-4.5L6 8.1a2.7 2.7 0 0 0 1.2-2.9z" transform="rotate(180 12 12)" fill="currentColor"/></symbol>
+  <symbol id="i-paw" viewBox="0 0 24 24"><ellipse cx="12" cy="15.8" rx="5.4" ry="4.4" fill="currentColor"/><ellipse cx="5.6" cy="10.2" rx="2.5" ry="3" fill="currentColor"/><ellipse cx="9.5" cy="6.6" rx="2.3" ry="2.9" fill="currentColor"/><ellipse cx="14.5" cy="6.6" rx="2.3" ry="2.9" fill="currentColor"/><ellipse cx="18.4" cy="10.2" rx="2.5" ry="3" fill="currentColor"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21s-8.6-5.1-8.6-11A4.9 4.9 0 0 1 12 6.6 4.9 4.9 0 0 1 20.6 10c0 5.9-8.6 11-8.6 11z" fill="currentColor"/><path d="M8.2 7.2a2.6 2.6 0 0 0-2.4 2.6" stroke="#fff" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".65"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12.5" r="8.4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 7.4v5.4l3.6 2.2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M9 2.8h6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 4.5l12 7.5-12 7.5z" fill="currentColor"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4.5" width="4.4" height="15" rx="1.6" fill="currentColor"/><rect x="13.6" y="4.5" width="4.4" height="15" rx="1.6" fill="currentColor"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.4" y="10.2" width="15.2" height="10.4" rx="2.4" fill="currentColor"/><path d="M8.2 10.2V8a3.8 3.8 0 0 1 7.6 0v2.2" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="15.4" r="1.6" fill="#062b63"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13M12.5 5.5L19 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.3l7.4 3v6.2c0 4.6-3.1 8.4-7.4 10.2-4.3-1.8-7.4-5.6-7.4-10.2V5.3z" fill="currentColor"/><ellipse cx="12" cy="12.6" rx="3.1" ry="2.6" fill="#fff" opacity=".95"/><circle cx="8.7" cy="9.7" r="1.3" fill="#fff"/><circle cx="12" cy="8.3" r="1.3" fill="#fff"/><circle cx="15.3" cy="9.7" r="1.3" fill="#fff"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2" fill="#ffc928"/><circle cx="12" cy="12" r="7.1" fill="none" stroke="#e08b00" stroke-width="1.6"/><use href="#i-paw" x="6.7" y="6.6" width="10.6" height="10.6" color="#d07e00"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="M3 5.6l6-2.1 6 2.1 6-2.1v14.9l-6 2.1-6-2.1-6 2.1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 3.5v14.9M15 5.6v14.9" stroke="currentColor" stroke-width="1.5" opacity=".65"/></symbol>
+</svg>
+
+<main>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark"><svg class="ico"><use href="#i-paw"/></svg></span>
+      <div class="brand-copy">
+        <strong>SUPER RESGATE</strong>
+        <small>PATRULHA CANINA • DELUXE</small>
+      </div>
+    </div>
+    <div class="headbuttons">
+      <button id="music" class="pill" aria-label="Ativar ou desativar música"><span class="dot"></span>♫ Música: OFF</button>
+      <button id="sfx" class="pill" aria-label="Ativar ou desativar efeitos">🔊 Efeitos: ON</button>
+    </div>
+  </header>
+
+  <!-- ================= MENU ================= -->
+  <section id="menu" class="panel menu-panel">
+    <div class="hero-title">
+      <div class="title-copy">
+        <span class="eyebrow">AVENTURA 2D PARA TODA A FAMÍLIA</span>
+        <h1>Patrulha Canina<br><em>Super Resgate</em></h1>
+        <p>Escolha um filhote, colete as <b>5 estrelas</b> e abra o portão do resgate em seis mundos diferentes.</p>
+        <div class="menu-actions">
+          <button class="big" id="start"><svg class="ico"><use href="#i-play"/></svg> JOGAR</button>
+          <button class="ghost big-ghost" id="levelsBtn"><svg class="ico"><use href="#i-map"/></svg> Escolher fase</button>
+        </div>
+      </div>
+      <div class="title-art" aria-hidden="true">
+        <div class="sunburst"></div>
+        <div class="badge-paw"><svg><use href="#i-paw"/></svg></div>
+        <img src="assets/characters/chase_0.png" alt="" class="title-pup">
+        <div class="title-chips"><span>6 filhotes</span><span>6 mundos</span><span>5 estrelas</span></div>
+      </div>
+    </div>
+
+    <div class="menu-grid">
+      <section class="menu-card heroes-card">
+        <h3><span class="tag-dot"></span> ESCOLHA SEU HERÓI</h3>
+        <div id="heroes" class="hero-grid"></div>
+      </section>
+
+      <section class="menu-card powers-card">
+        <h3><span class="tag-dot"></span> BLOCOS E PODERES</h3>
+        <div class="legend-grid">
+          <div class="legend"><span class="chip-icon chip-coin"><img src="assets/textures/coin.png" alt=""></span><b>Moeda</b></div>
+          <div class="legend"><span class="chip-icon chip-brick"><img src="assets/textures/brick.png" alt=""></span><b>Tijolo</b></div>
+          <div class="legend"><span class="chip-icon chip-question"><img src="assets/textures/question.png" alt=""></span><b>Surpresa</b></div>
+          <div class="legend"><span class="chip-icon chip-speed">⚡</span><b>Velocidade</b></div>
+          <div class="legend"><span class="chip-icon chip-jump">🚀</span><b>Superpulo</b></div>
+          <div class="legend"><span class="chip-icon chip-magnet">🧲</span><b>Ímã</b></div>
+          <div class="legend"><span class="chip-icon chip-shield"><svg><use href="#i-shield"/></svg></span><b>Escudo</b></div>
+          <div class="legend"><span class="chip-icon chip-heart"><svg><use href="#i-heart"/></svg></span><b>Vida extra</b></div>
+        </div>
+      </section>
+
+      <section class="menu-card enemies-card">
+        <h3><span class="tag-dot"></span> INIMIGOS</h3>
+        <div class="legend-grid enemy-grid">
+          <div class="legend"><span class="chip-icon enemy seagull">🕊️</span><b>Gaivota</b></div>
+          <div class="legend"><span class="chip-icon enemy crab">🦀</span><b>Caranguejo</b></div>
+          <div class="legend"><span class="chip-icon enemy croc">🐊</span><b>Jacaré</b></div>
+          <div class="legend"><span class="chip-icon enemy chest">🧰</span><b>Baú</b></div>
+          <div class="legend"><span class="chip-icon enemy spike"><svg viewBox="0 0 24 24" style="width:62%;height:62%"><path d="M2.5 20l4.6-11 4.6 11zM12.3 20l4.6-11 4.6 11z" fill="#dbe6f2" stroke="#7f8fa6" stroke-width="1"/></svg></span><b>Espinhos</b></div>
+        </div>
+        <p class="tip"><b>Dica:</b> pule na cabeça dos inimigos para vencê-los.</p>
+      </section>
+    </div>
+
+    <section class="menu-card stages-card">
+      <div class="card-title-row">
+        <h3><span class="tag-dot"></span> EXEMPLO DE FASES</h3>
+        <span class="muted">Complete uma fase para liberar a próxima</span>
+      </div>
+      <div id="stagePreview" class="stage-grid"></div>
+    </section>
+
+    <p class="help">
+      <b>Teclado:</b> ← → / A D mover · Espaço / W pular · E poder especial · Shift correr · Esc pausa &nbsp;•&nbsp;
+      <b>Controle:</b> analógico + A (pulo) e X (poder) &nbsp;•&nbsp; <b>Celular:</b> setas na tela
+    </p>
+  </section>
+
+  <!-- ================= SELEÇÃO DE FASE ================= -->
+  <section id="levels" class="panel levels-panel" hidden>
+    <div class="section-head">
+      <button id="backLevels" class="ghost">← Voltar</button>
+      <div>
+        <span class="eyebrow">MAPA DA AVENTURA</span>
+        <h2>Escolha uma fase</h2>
+      </div>
+      <span class="muted" id="levelsHint">Colete 5 estrelas em cada mundo</span>
+    </div>
+    <div id="levelCards" class="stage-grid large"></div>
+  </section>
+
+  <!-- ================= JOGO ================= -->
+  <section id="play" hidden>
+    <div class="screen" id="screen">
+      <canvas id="game" width="960" height="540" aria-label="Jogo de plataforma 2D da Patrulha Canina"></canvas>
+
+      <div class="hud" id="hud">
+        <div class="hud-group hud-left">
+          <div class="hero-token"><img id="hudPortrait" src="assets/characters/chase_0.png" alt=""></div>
+          <div class="hud-hero">
+            <div class="hud-name" id="hudHero">CHASE</div>
+            <div class="hearts" id="hudLives" aria-label="Vidas"></div>
+          </div>
+          <div class="hud-counters">
+            <span class="counter" title="Estrelas"><img class="hud-ico" src="assets/textures/star.png" alt="Estrelas"><b id="hudStars">0</b><i>/5</i></span>
+            <span class="counter" title="Ossos"><img class="hud-ico" src="assets/textures/bone.png" alt="Ossos"><b id="hudBones">0</b></span>
+            <span class="counter" title="Escudos"><svg class="hud-ico svg-shield"><use href="#i-shield"/></svg><b id="hudShield">0</b></span>
+            <span class="counter" title="Moedas"><img class="hud-ico" src="assets/textures/coin.png" alt="Moedas"><b id="hudCoins">0</b></span>
+          </div>
+        </div>
+
+        <div class="stage-banner">
+          <span id="hudStageTag">FASE 1-1</span>
+          <strong id="hudLevel">BAÍA DA AVENTURA</strong>
+        </div>
+
+        <div class="hud-group hud-right">
+          <div class="timer"><svg class="clock"><use href="#i-clock"/></svg><b id="hudTime">240</b></div>
+          <button id="pause" class="pause-btn" aria-label="Pausar jogo"><svg><use href="#i-pause"/></svg></button>
+        </div>
+      </div>
+
+      <div id="powerChip" class="power-chip" hidden><span id="powerIcon">⚡</span><b id="powerName">VELOCIDADE</b><i id="powerTime">8s</i></div>
+      <div id="comboChip" class="combo-chip" hidden>COMBO <b>x2</b></div>
+
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+      <div id="intro" class="intro" hidden>
+        <span id="introTag">FASE 1-1</span>
+        <strong id="introName">BAÍA DA AVENTURA</strong>
+        <p id="introTip">Colete 5 estrelas e abra o resgate!</p>
+      </div>
+
+      <div class="touch" id="touch">
+        <div class="dpad">
+          <button data-action="left" aria-label="Mover para esquerda">◀</button>
+          <button data-action="right" aria-label="Mover para direita">▶</button>
+        </div>
+        <div class="actions">
+          <button data-action="power" class="power-btn" aria-label="Poder especial"><svg><use href="#i-paw"/></svg><span class="cd" id="powerCd"></span></button>
+          <button data-action="jump" class="jump-btn" aria-label="Pular">▲</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="playbar">
+      <div class="playbar-hero"><b id="abilityName">⚡ Chase</b><span id="abilityDesc">Dash policial: avance com supervelocidade.</span></div>
+      <div class="playbar-keys">Espaço pular · E poder · Shift correr · Esc pausa</div>
+    </div>
+  </section>
+
+  <!-- ================= MODAL ================= -->
+  <section id="overlay" class="overlay" hidden>
+    <div class="panel dialog">
+      <h2 id="overlayTitle"></h2>
+      <div id="overlayStars" class="dialog-stars"></div>
+      <p id="overlayText"></p>
+      <div id="overlayButtons" class="dialog-buttons"></div>
+    </div>
+  </section>
+
+  <footer>Projeto de fã não oficial • Feito para diversão infantil • O progresso é salvo neste navegador</footer>
+</main>
+
+<script src="game.js" defer></script>
+</body>
+</html>

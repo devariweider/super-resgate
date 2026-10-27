@@ -8,20 +8,42 @@
 
 Jogue sem instalar nada: funciona no **computador**, no **celular** e com **controle USB** compatível.
 
+## ✨ O que tem no jogo
+
+- **6 filhotes jogáveis**, cada um com um poder especial diferente.
+- **6 mundos** com visual próprio e uma **fase final com chefe** (jacaré).
+- **5 estrelas por fase**: junte todas para abrir o portão do resgate.
+- Blocos surpresa, tijolos, moedas, ossos, escudo, ímã, super pulo e vida extra.
+- Plataformas móveis, plataformas que quebram, pontes de corda, água e abismos.
+- Checkpoints, vidas, combo de moedas (até x5), partículas, tremor de tela e efeitos sonoros.
+- Interface responsiva com HUD azul e dourado, mapa de fases e cartões dos heróis.
+- Progresso, herói escolhido e recordes salvos no navegador.
+
+## 🐶 Heróis e poderes
+
+| Filhote | Poder | O que faz |
+| --- | --- | --- |
+| Chase | Dash Policial | Avanço rápido que derruba inimigos. |
+| Marshall | Jato d'Água | Apaga fogo em volta e afasta inimigos. |
+| Skye | Planeio | Segure o pulo para planar sobre os perigos. |
+| Rubble | Onda de Choque | Quebra tijolos e derruba inimigos próximos. |
+| Rocky | Ponte Rápida | Cria uma ponte sobre o próximo buraco. |
+| Zuma | Impulso Aquático | Atravessa a água por alguns segundos. |
+
 ## 🕹️ Controles
 
-- **Computador:** setas ou A/D para andar, espaço ou seta para cima para pular e E para usar o poder.
-- **Celular:** use os botões que aparecem na tela.
-- **Controle USB:** use o direcional ou analógico para andar e os botões de ação para pular e usar poderes.
+- **Computador:** ← → ou A/D para andar, **Espaço** ou **W** para pular, **E** ou **X** para o poder, **Shift** para correr, **Esc** para pausar.
+- **Celular:** setas na tela e botões de pulo e poder.
+- **Controle USB:** direcional/analógico para andar e os botões de ação para pular e usar poderes.
 
 ## 🌎 Fases
 
-1. Baía da Aventura
-2. Floresta
-3. Caverna
-4. Neve
-5. Cidade
-6. Torre Final
+1. **Baía da Aventura** — o começo da aventura, com pontes e água.
+2. **Floresta** — plataformas no meio das árvores e gaivotas.
+3. **Caverna** — cristais, plataformas móveis e fogo.
+4. **Neve** — geleiras, plataformas escorregadias e penhascos.
+5. **Cidade** — prédios, plataformas que quebram e muito movimento.
+6. **Torre Final** — o chefe jacaré e o resgate final.
 
 ## 🚀 Publicação
 
