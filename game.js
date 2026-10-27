@@ -242,6 +242,10 @@ function triggerAdvance() {
   return true;
 }
 
+function advanceHint(action) {
+  return `<span class="dialog-hint">${hasPad() ? `Controle: botão Y ${action}` : `Teclado: Enter ${action}`}</span>`;
+}
+
 // Botão Y (índice 3) avança a tela de fase concluída, mesmo com o jogo parado.
 let padAdvancePrev = false;
 setInterval(() => {
@@ -822,7 +826,7 @@ function gameOverScreen() {
   sfx('hurt');
   openDialog(
     '💙 FIM DE JOGO',
-    `Você foi muito corajoso!<br>⭐ ${stars}/5 estrelas &nbsp; · &nbsp; 🦴 ${bones} ossos &nbsp; · &nbsp; 🪙 ${coins} moedas<br>Pontos: <b>${score}</b>`,
+    `Você foi muito corajoso!<br>⭐ ${stars}/5 estrelas &nbsp; · &nbsp; 🦴 ${bones} ossos &nbsp; · &nbsp; 🪙 ${coins} moedas<br>Pontos: <b>${score}</b>${advanceHint('reinicia a fase')}`,
     0,
     [
       { label: 'Tentar de novo', fn: () => launch(stage) },
@@ -830,6 +834,7 @@ function gameOverScreen() {
       { label: 'Menu', fn: () => { stopGame(); showPage('menu'); } }
     ]
   );
+  overlayAdvance = () => launch(stage);
 }
 
 function finishLevel() {
@@ -847,10 +852,9 @@ function finishLevel() {
   buttons.push({ label: 'Jogar de novo', fn: () => launch(stage) });
   buttons.push({ label: 'Mapa de fases', fn: () => { stopGame(); openLevels(); } });
   buttons.push({ label: 'Menu', fn: () => { stopGame(); showPage('menu'); } });
-  const hint = hasPad() ? 'Controle: botão Y avança' : 'Teclado: Enter avança';
   openDialog(
     stage === 5 ? '🏆 MISSÃO CUMPRIDA!' : '🎉 FASE CONCLUÍDA!',
-    `<b>${name}</b><br>⭐ ${stars}/5 estrelas &nbsp; · &nbsp; 🦴 ${bones} &nbsp; · &nbsp; 🪙 ${coins} &nbsp; · &nbsp; ❤️ ${lives}<br>Tempo restante: ${Math.ceil(gameTime)}s &nbsp; · &nbsp; Pontos: <b>${total}</b><span class="dialog-hint">${hint}</span>`,
+    `<b>${name}</b><br>⭐ ${stars}/5 estrelas &nbsp; · &nbsp; 🦴 ${bones} &nbsp; · &nbsp; 🪙 ${coins} &nbsp; · &nbsp; ❤️ ${lives}<br>Tempo restante: ${Math.ceil(gameTime)}s &nbsp; · &nbsp; Pontos: <b>${total}</b>${advanceHint('avança')}`,
     rating,
     buttons
   );

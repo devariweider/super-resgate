@@ -34,7 +34,7 @@ Jogue sem instalar nada: funciona no **computador**, no **celular** e com **cont
 
 - **Computador:** ← → ou A/D para andar, **Espaço** ou **W** para pular, **E** ou **X** para o poder, **Shift** para correr, **Esc** para pausar.
 - **Celular:** setas na tela e botões de pulo e poder.
-- **Controle USB:** direcional/analógico para andar, **A** para pular, **X/B** para o poder e **Y** para ir direto à próxima fase na tela de fase concluída.
+- **Controle USB:** direcional/analógico para andar, **A** para pular, **X/B** para o poder, **Y** para avançar de fase na tela de fase concluída e **Y** para reiniciar a fase na tela de fim de jogo.
 
 ## 🌎 Fases
 

@@ -27,7 +27,8 @@ Controle USB (compatível):
   direcional/analógico ... andar
   A ou seta para cima ... pular
   X ou B ................ poder especial
-  Y ..................... próxima fase (na tela de fase concluída)
+  Y ..................... próxima fase (fase concluída) / reiniciar a fase
+                          (na tela de fim de jogo)
 
 PERSONAGENS E PODERES
 ---------------------
@@ -73,7 +74,7 @@ DICAS
 - O botão de poder recarrega sozinho; use nos inimigos e no chefe.
 - Junte moedas rápido para aumentar o combo e ganhar mais pontos.
 - No controle, aperte Y na tela de FASE CONCLUÍDA para ir direto à próxima
-  fase. No teclado, aperte Enter.
+  fase. No FIM DE JOGO, o Y reinicia a fase. No teclado, use Enter.
 
 ARQUIVOS
 --------
