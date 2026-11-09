@@ -2397,6 +2397,7 @@ function drawPlatform(pl, t) {
     g.arc(pl.x + pl.w - 12, pl.y + pl.h - 2, 3, 0, TAU);
     g.fill();
   }
+  g.restore();
 }
 
 function drawStarShape(x, y, r, fill, stroke) {
